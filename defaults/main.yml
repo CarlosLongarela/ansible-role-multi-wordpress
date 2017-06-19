@@ -1,0 +1,26 @@
+---
+wp_cli_url: "https://raw.github.com/wp-cli/builds/gh-pages/phar/wp-cli.phar"
+wp_cli_bin: "wp"
+wp_cli_path: "/usr/bin/{{ wp_cli_bin}}"
+wp_cli_packages: []
+
+wp_cli_webserver_user: www-data
+wp_cli_webserver_group: www-data
+
+wp_cli_sites:
+  wp_site_default:
+    locale: "es_ES"
+    path: "/home/webs/wordpress"
+    version: "latest"
+
+    db: "dbname"
+    db_user: "dbuser"
+    db_pass: "dbpassword"
+    db_host: "localhost"
+    dp_prefix: "wp_"
+
+    url: "example.com"
+    title: "WordPress Site"
+    admin_user: "supervisor"
+    admin_password: "strongpassword"
+    admin_email: "info@example.com"

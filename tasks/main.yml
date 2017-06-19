@@ -1,0 +1,71 @@
+---
+- name: Instalamos WP-CLI.
+  get_url:
+    url: "{{ wp_cli_url }}"
+    dest: "{{ wp_cli_path }}"
+    force: true
+    owner: "{{ wp_cli_webserver_user }}"
+    group: "{{ wp_cli_webserver_group }}"
+    mode: 0755
+
+- name: Instalamos los plugins de WP-CLI.
+  command: "{{ wp_cli_bin }} package install {{ item }}"
+  register: resultado
+  changed_when: "'Installing package' in resultado.stdout"
+  when: item is defined
+  with_items:
+    - "{{ wp_cli_packages }}"
+
+- name: Comprobamos si existe el archivo de WordPress readme.html
+  stat:
+    path: "{{ wp_cli_wp_path }}/readme.html"
+  register: wp_readme_{{ wp_cli_sites.value }}
+  with_items:
+    - "{{ wp_cli_sites }}"
+
+- name: Descargamos WordPress.
+  command: "{{ wp_cli_bin }} core download --locale='{{ wp_cli_wp_locale }}' --path='{{ wp_cli_wp_path }}' --version='{{ wp_cli_wp_version }}'"
+  args:
+    creates: "{{ wp_cli_wp_path }}/wp-settings.php"
+  become: yes
+  become_user: "{{ wp_cli_webserver_user }}"
+  with_items:
+    - "{{ wp_cli_sites }}"
+
+- name: Configuramos WordPress.
+  command: "{{ wp_cli_bin }} core config --path='{{ wp_cli_wp_path }}' --dbname='{{ wp_cli_wp_db }}' --dbuser='{{ wp_cli_wp_db_user }}' --dbpass='{{ wp_cli_wp_db_pass }}' --dbhost='{{ wp_cli_wp_db_host }}' --dbprefix='{{ wp_cli_wp_dp_prefix }}'"
+  args:
+    creates: "{{ wp_cli_wp_path }}/wp-config.php"
+  become: yes
+  become_user: "{{ wp_cli_webserver_user }}"
+  with_items:
+    - "{{ wp_cli_sites }}"
+
+- name: Instalamos WordPress.
+  command: "{{ wp_cli_bin }} core install --path='{{ wp_cli_wp_path }}' --url='{{ wp_cli_wp_url }}' --title='{{ wp_cli_wp_title }}' --admin_user='{{ wp_cli_wp_admin_user }}' --admin_password='{{ wp_cli_wp_admin_password }}' --admin_email='{{ wp_cli_wp_admin_email }}' --skip-email"
+  become: yes
+  become_user: "{{ wp_cli_webserver_user }}"
+  when: wp_readme{{ wp_cli_sites.value }}.stat.exists == True
+  with_items:
+    - "{{ wp_cli_sites }}"
+
+- name: Permisos de carpetas y archivos en WordPress (Folders 755, Files 644).
+  file:
+    path: "{{ wp_cli_wp_path }}"
+    mode: u=rwX,g=rX,o=rX
+    owner: "{{ wp_cli_webserver_user }}"
+    group: "{{ wp_cli_webserver_group }}"
+    recurse: yes
+  with_items:
+    - "{{ wp_cli_sites }}"
+
+- name: Eliminamos archivos innecesarios de WordPress.
+  file:
+    path: "{{ wp_cli_wp_path }}/{{ item }}"
+    state: absent
+  with_items:
+    - licencia.txt
+    - license.txt
+    - readme.html
+  with_items:
+    - "{{ wp_cli_sites }}"
