@@ -24,3 +24,5 @@ wp_cli_sites:
     admin_user: "supervisor"
     admin_password: "strongpassword"
     admin_email: "info@example.com"
+
+    plugins: []

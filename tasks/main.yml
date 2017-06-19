@@ -18,64 +18,74 @@
 
 - name: Comprobamos si existe el archivo de WordPress readme.html
   stat:
-    path: "{{ item.path }}/readme.html"
-  register: wp_readme_{{ item }}
-  with_items:
+    path: "{{ item.value.path }}/readme.html"
+  register: wp_readme
+  with_dict:
     - "{{ wp_cli_sites }}"
 
 - name: Descargamos WordPress.
-  command: "{{ wp_cli_bin }} core download --locale='{{ item.locale }}' --path='{{ item.path }}' --version='{{ item.version }}'"
+  command: "{{ wp_cli_bin }} core download --locale='{{ item.value.locale }}' --path='{{ item.value.path }}' --version='{{ item.value.version }}'"
   args:
-    creates: "{{ item.path }}/wp-settings.php"
+    creates: "{{ item.value.path }}/wp-settings.php"
   become: yes
   become_user: "{{ wp_cli_webserver_user }}"
-  with_items:
+  with_dict:
     - "{{ wp_cli_sites }}"
 
 - name: Configuramos WordPress.
-  command: "{{ wp_cli_bin }} core config --path='{{ item.path }}' --dbname='{{ item.db }}' --dbuser='{{ item.db_user }}' --dbpass='{{ item.db_pass }}' --dbhost='{{ item.db_host }}' --dbprefix='{{ item.dp_prefix }}'"
+  command: "{{ wp_cli_bin }} core config --path='{{ item.value.path }}' --dbname='{{ item.value.db }}' --dbuser='{{ item.value.db_user }}' --dbpass='{{ item.value.db_pass }}' --dbhost='{{ item.value.db_host }}' --dbprefix='{{ item.value.dp_prefix }}'"
   args:
-    creates: "{{ item.path }}/wp-config.php"
+    creates: "{{ item.value.path }}/wp-config.php"
   become: yes
   become_user: "{{ wp_cli_webserver_user }}"
-  with_items:
+  with_dict:
     - "{{ wp_cli_sites }}"
 
 - name: Instalamos WordPress.
-  command: "{{ wp_cli_bin }} core install --path='{{item.path }}' --url='{{ item.url }}' --title='{{ item.title }}' --admin_user='{{ item.admin_user }}' --admin_password='{{ item.admin_password }}' --admin_email='{{ item.admin_email }}' --skip-email"
+  command: "{{ wp_cli_bin }} core install --path='{{item.value.path }}' --url='{{ item.value.url }}' --title='{{ item.value.title }}' --admin_user='{{ item.value.admin_user }}' --admin_password='{{ item.value.admin_password }}' --admin_email='{{ item.value.admin_email }}' --skip-email"
   become: yes
   become_user: "{{ wp_cli_webserver_user }}"
-  when: wp_readme_{{ item }}.stat.exists == True
-  with_items:
+  when: wp_readme.stat.exists == True
+  with_dict:
     - "{{ wp_cli_sites }}"
+
+- name: Instalamos los plugins configurados de WordPress
+  command: "{{item[0].value.path }}/{{ wp_cli_bin }} plugin install {{ item[1].value }} --activate"
+  become: yes
+  become_user: "{{ wp_cli_webserver_user }}"
+  when: wp_readme.stat.exists == True
+  with_dict:
+    - "{{ wp_cli_sites }}"
+    - "{{ wp_cli_sites.plugins }}"
 
 - name: Permisos de carpetas y archivos en WordPress (Folders 755, Files 644).
   file:
-    path: "{{ item.path }}"
+    path: "{{ item.value.path }}"
     mode: u=rwX,g=rX,o=rX
     owner: "{{ wp_cli_webserver_user }}"
     group: "{{ wp_cli_webserver_group }}"
     recurse: yes
-  with_items:
+  with_dict:
     - "{{ wp_cli_sites }}"
 
-- name: Eliminamos licencia.txt del raiz de WordPress.
+- name: Eliminamos los archivos innecesarios del raiz de WordPress.
   file:
-    path: "{{ item.path }}/licencia.txt"
+    path: "{{ item[0].value.path }}/{{ item[1] }}"
     state: absent
-  with_items:
+  with_subelements:
     - "{{ wp_cli_sites }}"
+    - [ 'licencia.txt', 'license.txt', 'readme.html' ]
 
-- name: Eliminamos license.txt del raiz de WordPress.
-  file:
-    path: "{{ item.path }}/license.txt"
-    state: absent
-  with_items:
-    - "{{ wp_cli_sites }}"
-
-- name: Eliminamos readme.html del raiz de WordPress.
-  file:
-    path: "{{ item.path }}/readme.html"
-    state: absent
-  with_items:
-    - "{{ wp_cli_sites }}"
+#- name: Eliminamos license.txt del raiz de WordPress.
+#  file:
+#    path: "{{ item.value.path }}/license.txt"
+#    state: absent
+#  with_dict:
+#    - "{{ wp_cli_sites }}"
+#
+#- name: Eliminamos readme.html del raiz de WordPress.
+#  file:
+#    path: "{{ item.value.path }}/readme.html"
+#    state: absent
+#  with_dict:
+#    - "{{ wp_cli_sites }}"
