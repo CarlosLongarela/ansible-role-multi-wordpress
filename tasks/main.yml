@@ -18,40 +18,40 @@
 
 - name: Comprobamos si existe el archivo de WordPress readme.html
   stat:
-    path: "{{ wp_cli_wp_path }}/readme.html"
-  register: wp_readme_{{ wp_cli_sites.value }}
+    path: "{{ item.path }}/readme.html"
+  register: wp_readme_{{ item }}
   with_items:
     - "{{ wp_cli_sites }}"
 
 - name: Descargamos WordPress.
-  command: "{{ wp_cli_bin }} core download --locale='{{ wp_cli_wp_locale }}' --path='{{ wp_cli_wp_path }}' --version='{{ wp_cli_wp_version }}'"
+  command: "{{ wp_cli_bin }} core download --locale='{{ item.locale }}' --path='{{ item.path }}' --version='{{ item.version }}'"
   args:
-    creates: "{{ wp_cli_wp_path }}/wp-settings.php"
+    creates: "{{ item.path }}/wp-settings.php"
   become: yes
   become_user: "{{ wp_cli_webserver_user }}"
   with_items:
     - "{{ wp_cli_sites }}"
 
 - name: Configuramos WordPress.
-  command: "{{ wp_cli_bin }} core config --path='{{ wp_cli_wp_path }}' --dbname='{{ wp_cli_wp_db }}' --dbuser='{{ wp_cli_wp_db_user }}' --dbpass='{{ wp_cli_wp_db_pass }}' --dbhost='{{ wp_cli_wp_db_host }}' --dbprefix='{{ wp_cli_wp_dp_prefix }}'"
+  command: "{{ wp_cli_bin }} core config --path='{{ item.path }}' --dbname='{{ item.db }}' --dbuser='{{ item.db_user }}' --dbpass='{{ item.db_pass }}' --dbhost='{{ item.db_host }}' --dbprefix='{{ item.dp_prefix }}'"
   args:
-    creates: "{{ wp_cli_wp_path }}/wp-config.php"
+    creates: "{{ item.path }}/wp-config.php"
   become: yes
   become_user: "{{ wp_cli_webserver_user }}"
   with_items:
     - "{{ wp_cli_sites }}"
 
 - name: Instalamos WordPress.
-  command: "{{ wp_cli_bin }} core install --path='{{ wp_cli_wp_path }}' --url='{{ wp_cli_wp_url }}' --title='{{ wp_cli_wp_title }}' --admin_user='{{ wp_cli_wp_admin_user }}' --admin_password='{{ wp_cli_wp_admin_password }}' --admin_email='{{ wp_cli_wp_admin_email }}' --skip-email"
+  command: "{{ wp_cli_bin }} core install --path='{{item.path }}' --url='{{ item.url }}' --title='{{ item.title }}' --admin_user='{{ item.admin_user }}' --admin_password='{{ item.admin_password }}' --admin_email='{{ item.admin_email }}' --skip-email"
   become: yes
   become_user: "{{ wp_cli_webserver_user }}"
-  when: wp_readme{{ wp_cli_sites.value }}.stat.exists == True
+  when: wp_readme_{{ item }}.stat.exists == True
   with_items:
     - "{{ wp_cli_sites }}"
 
 - name: Permisos de carpetas y archivos en WordPress (Folders 755, Files 644).
   file:
-    path: "{{ wp_cli_wp_path }}"
+    path: "{{ item.path }}"
     mode: u=rwX,g=rX,o=rX
     owner: "{{ wp_cli_webserver_user }}"
     group: "{{ wp_cli_webserver_group }}"
@@ -59,13 +59,23 @@
   with_items:
     - "{{ wp_cli_sites }}"
 
-- name: Eliminamos archivos innecesarios de WordPress.
+- name: Eliminamos licencia.txt del raiz de WordPress.
   file:
-    path: "{{ wp_cli_wp_path }}/{{ item }}"
+    path: "{{ item.path }}/licencia.txt"
     state: absent
   with_items:
-    - licencia.txt
-    - license.txt
-    - readme.html
+    - "{{ wp_cli_sites }}"
+
+- name: Eliminamos license.txt del raiz de WordPress.
+  file:
+    path: "{{ item.path }}/license.txt"
+    state: absent
+  with_items:
+    - "{{ wp_cli_sites }}"
+
+- name: Eliminamos readme.html del raiz de WordPress.
+  file:
+    path: "{{ item.path }}/readme.html"
+    state: absent
   with_items:
     - "{{ wp_cli_sites }}"
