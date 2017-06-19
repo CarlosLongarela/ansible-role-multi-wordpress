@@ -1,4 +1,4 @@
-Ansible Role: WordPress
+Ansible Role: Multi WordPress
 =========
 
 [![Build Status](https://travis-ci.org/CarlosLongarela/ansible-role-multi-wordpress.svg?branch=master)](https://travis-ci.org/CarlosLongarela/ansible-role-wordpress)
