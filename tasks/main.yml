@@ -20,8 +20,7 @@
   stat:
     path: "{{ item.value.path }}/readme.html"
   register: wp_readme
-  with_dict:
-    - "{{ wp_cli_sites }}"
+  with_dict: "{{ wp_cli_sites }}"
 
 - name: Descargamos WordPress.
   command: "{{ wp_cli_bin }} core download --locale='{{ item.value.locale }}' --path='{{ item.value.path }}' --version='{{ item.value.version }}'"
@@ -29,8 +28,7 @@
     creates: "{{ item.value.path }}/wp-settings.php"
   become: yes
   become_user: "{{ wp_cli_webserver_user }}"
-  with_dict:
-    - "{{ wp_cli_sites }}"
+  with_dict: "{{ wp_cli_sites }}"
 
 - name: Configuramos WordPress.
   command: "{{ wp_cli_bin }} core config --path='{{ item.value.path }}' --dbname='{{ item.value.db }}' --dbuser='{{ item.value.db_user }}' --dbpass='{{ item.value.db_pass }}' --dbhost='{{ item.value.db_host }}' --dbprefix='{{ item.value.dp_prefix }}'"
@@ -38,16 +36,14 @@
     creates: "{{ item.value.path }}/wp-config.php"
   become: yes
   become_user: "{{ wp_cli_webserver_user }}"
-  with_dict:
-    - "{{ wp_cli_sites }}"
+  with_dict: "{{ wp_cli_sites }}"
 
 - name: Instalamos WordPress.
   command: "{{ wp_cli_bin }} core install --path='{{item.value.path }}' --url='{{ item.value.url }}' --title='{{ item.value.title }}' --admin_user='{{ item.value.admin_user }}' --admin_password='{{ item.value.admin_password }}' --admin_email='{{ item.value.admin_email }}' --skip-email"
   become: yes
   become_user: "{{ wp_cli_webserver_user }}"
   when: wp_readme.stat.exists == True
-  with_dict:
-    - "{{ wp_cli_sites }}"
+  with_dict: "{{ wp_cli_sites }}"
 
 - name: Instalamos los plugins configurados de WordPress
   command: "{{item[0].value.path }}/{{ wp_cli_bin }} plugin install {{ item[1].value }} --activate"
@@ -65,8 +61,7 @@
     owner: "{{ wp_cli_webserver_user }}"
     group: "{{ wp_cli_webserver_group }}"
     recurse: yes
-  with_dict:
-    - "{{ wp_cli_sites }}"
+  with_dict: "{{ wp_cli_sites }}"
 
 - name: Eliminamos los archivos innecesarios del raiz de WordPress.
   file:
