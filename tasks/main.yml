@@ -42,14 +42,14 @@
   command: "{{ wp_cli_bin }} core install --path='{{item.value.path }}' --url='{{ item.value.url }}' --title='{{ item.value.title }}' --admin_user='{{ item.value.admin_user }}' --admin_password='{{ item.value.admin_password }}' --admin_email='{{ item.value.admin_email }}' --skip-email"
   become: yes
   become_user: "{{ wp_cli_webserver_user }}"
-  when: wp_readme.stat.exists == True
+  when: wp_readme.results.stat.exists == True
   with_dict: "{{ wp_cli_sites }}"
 
 - name: Instalamos los plugins configurados de WordPress
   command: "{{item[0].value.path }}/{{ wp_cli_bin }} plugin install {{ item[1].value }} --activate"
   become: yes
   become_user: "{{ wp_cli_webserver_user }}"
-  when: wp_readme.stat.exists == True
+  when: wp_readme.results.stat.exists == True
   with_dict:
     - "{{ wp_cli_sites }}"
     - "{{ wp_cli_sites.plugins }}"
