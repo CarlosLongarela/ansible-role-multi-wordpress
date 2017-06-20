@@ -38,8 +38,8 @@
   become_user: "{{ wp_cli_webserver_user }}"
   with_dict: "{{ wp_cli_sites }}"
 
-- name: Debug de WP README.
-  debug: "{{ wp_readme }}"
+- debug: Debug de WP README.
+  msg: "Valor de wp_readme: {{ wp_readme }}"
   with_dict: "{{ wp_cli_sites }}"
 
 - name: Instalamos WordPress.
