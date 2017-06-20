@@ -38,6 +38,10 @@
   become_user: "{{ wp_cli_webserver_user }}"
   with_dict: "{{ wp_cli_sites }}"
 
+- name: Debug de WP README.
+  debug: "{{ wp_readme }"
+  with_dict: "{{ wp_cli_sites }}"
+
 - name: Instalamos WordPress.
   command: "{{ wp_cli_bin }} core install --path='{{item.value.path }}' --url='{{ item.value.url }}' --title='{{ item.value.title }}' --admin_user='{{ item.value.admin_user }}' --admin_password='{{ item.value.admin_password }}' --admin_email='{{ item.value.admin_email }}' --skip-email"
   become: yes
