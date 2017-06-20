@@ -39,7 +39,7 @@
   with_dict: "{{ wp_cli_sites }}"
 
 - name: Debug de WP README.
-  debug: "{{ wp_readme }"
+  debug: "{{ wp_readme }}"
   with_dict: "{{ wp_cli_sites }}"
 
 - name: Instalamos WordPress.
