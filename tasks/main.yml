@@ -39,7 +39,7 @@
   with_dict: "{{ wp_cli_sites }}"
 
 - name: Debug de WP README.
-  command: "Valor de wp_readme: {{ wp_readme }}"
+  command: "print valores {{ wp_readme.results[stat.exists] }}"
   with_dict: "{{ wp_cli_sites }}"
 
 - name: Instalamos WordPress.
