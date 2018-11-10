@@ -43,7 +43,7 @@ Role Variables
 
 Dependencies
 ------------
-
+- [CarlosLongarela.percona](https://galaxy.ansible.com/CarlosLongarela/percona/)
 - [CarlosLongarela.mariadb](https://galaxy.ansible.com/CarlosLongarela/mariadb/)
 - [CarlosLongarela.nginx](https://galaxy.ansible.com/CarlosLongarela/nginx/)
 - [CarlosLongarela.php7](https://galaxy.ansible.com/CarlosLongarela/php7/)
@@ -89,7 +89,7 @@ Example Playbook
 License
 -------
 
-GPLv2
+GPLv3
 
 Author Information
 ------------------

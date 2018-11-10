@@ -1,11 +1,12 @@
 galaxy_info:
+  role_name: multi-wordpress
   author: Carlos Longarela
   description: Several WordPress site configuration and installation with WP Cli that also is installed.
-  company: Desarrollo web Carlos Longarela
+  company: Taberna WordPress
 
-  license: license GPLv2
+  license: GPLv3
 
-  min_ansible_version: 1.8
+  min_ansible_version: 2.5
 
   platforms:
    - name: Ubuntu
